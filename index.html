@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Công cụ tính tiền</title>
+    <title>Công cụ tính tiền theo giờ</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -20,19 +20,18 @@
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 320px;
-            text-align: center;
+            width: 380px;
         }
         
         h2 {
             color: #333;
             margin-top: 0;
             margin-bottom: 25px;
+            text-align: center;
         }
         
         .input-group {
-            margin-bottom: 15px;
-            text-align: left;
+            margin-bottom: 20px;
         }
         
         label {
@@ -40,6 +39,7 @@
             font-weight: 600;
             margin-bottom: 8px;
             color: #555;
+            font-size: 14px;
         }
         
         input[type="number"] {
@@ -57,11 +57,27 @@
             border-color: #007bff;
             box-shadow: 0 0 5px rgba(0,123,255,0.3);
         }
+
+        .time-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .time-row input {
+            text-align: center;
+        }
+
+        .time-colon {
+            font-size: 20px;
+            font-weight: bold;
+            color: #777;
+        }
         
         button {
             width: 100%;
             padding: 14px;
-            background-color: #007bff;
+            background-color: #28a745;
             color: white;
             border: none;
             border-radius: 8px;
@@ -69,11 +85,11 @@
             font-weight: bold;
             cursor: pointer;
             transition: background-color 0.2s, transform 0.1s;
-            margin-top: 15px;
+            margin-top: 5px;
         }
         
         button:hover {
-            background-color: #0056b3;
+            background-color: #218838;
         }
         
         button:active {
@@ -86,16 +102,25 @@
             background-color: #f8f9fa;
             border-radius: 8px;
             border: 1px solid #e9ecef;
+            text-align: center;
+        }
+        
+        .info-text {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 10px;
+            font-style: italic;
         }
         
         .result-label {
-            font-size: 14px;
-            color: #6c757d;
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
             margin-bottom: 5px;
         }
         
         #total-amount {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: bold;
             color: #d9534f;
             margin: 0;
@@ -105,44 +130,78 @@
 <body>
 
     <div class="calculator-container">
-        <h2>Tính Tiền Dịch Vụ</h2>
+        <!-- Đã sửa tiêu đề -->
+        <h2>Tính Tiền</h2>
         
         <div class="input-group">
-            <label for="hours">Số giờ:</label>
-            <input type="number" id="hours" min="0" placeholder="0" value="0">
+            <label>Đơn giá mỗi giờ (VNĐ):</label>
+            <input type="number" id="hourly-rate" value="120000" min="0" step="1000">
         </div>
         
         <div class="input-group">
-            <label for="minutes">Số phút:</label>
-            <input type="number" id="minutes" min="0" max="59" placeholder="0" value="0">
+            <label>Giờ bắt đầu:</label>
+            <div class="time-row">
+                <input type="number" id="start-h" placeholder="Giờ" min="0" max="23">
+                <span class="time-colon">:</span>
+                <input type="number" id="start-m" placeholder="Phút" min="0" max="59">
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label>Giờ kết thúc:</label>
+            <div class="time-row">
+                <input type="number" id="end-h" placeholder="Giờ" min="0" max="23">
+                <span class="time-colon">:</span>
+                <input type="number" id="end-m" placeholder="Phút" min="0" max="59">
+            </div>
         </div>
         
         <button onclick="calculateMoney()">Tính Thành Tiền</button>
         
         <div class="result-box">
-            <div class="result-label">Tổng cộng:</div>
+            <div id="time-duration" class="info-text">Chưa có dữ liệu</div>
+            <!-- Đã sửa nhãn hiển thị tiền -->
+            <div class="result-label">Số tiền:</div>
             <div id="total-amount">0 VNĐ</div>
         </div>
     </div>
 
     <script>
         function calculateMoney() {
-            // Lấy giá trị từ ô input, nếu người dùng để trống thì mặc định là 0
-            const hours = parseInt(document.getElementById('hours').value) || 0;
-            const minutes = parseInt(document.getElementById('minutes').value) || 0;
+            const hourlyRate = parseFloat(document.getElementById('hourly-rate').value) || 0;
             
-            // Định nghĩa mức giá
-            const ratePerHour = 120000;
-            const ratePerMinute = ratePerHour / 60; // Tính ra 2.000 VNĐ mỗi phút
-            
-            // Tính tổng tiền
-            const total = (hours * ratePerHour) + (minutes * ratePerMinute);
-            
-            // Hàm toLocaleString('vi-VN') giúp định dạng số có dấu chấm phân cách hàng nghìn (VD: 120.000)
-            const formattedTotal = total.toLocaleString('vi-VN');
-            
-            // Hiển thị kết quả ra màn hình
-            document.getElementById('total-amount').innerText = formattedTotal + ' VNĐ';
+            const startH = parseInt(document.getElementById('start-h').value) || 0;
+            const startM = parseInt(document.getElementById('start-m').value) || 0;
+            const endH = parseInt(document.getElementById('end-h').value) || 0;
+            const endM = parseInt(document.getElementById('end-m').value) || 0;
+
+            if (startH > 23 || endH > 23 || startM > 59 || endM > 59) {
+                alert("Vui lòng nhập định dạng giờ (0-23) và phút (0-59) hợp lệ!");
+                return;
+            }
+
+            let startTotalMins = (startH * 60) + startM;
+            let endTotalMins = (endH * 60) + endM;
+
+            if (endTotalMins < startTotalMins) {
+                endTotalMins += (24 * 60);
+            }
+
+            if (startTotalMins === 0 && endTotalMins === 0) {
+                document.getElementById('time-duration').innerText = `Vui lòng nhập thời gian`;
+                document.getElementById('total-amount').innerText = `0 VNĐ`;
+                return;
+            }
+
+            const durationMins = endTotalMins - startTotalMins;
+            const ratePerMinute = hourlyRate / 60;
+            const totalMoney = Math.round(durationMins * ratePerMinute); 
+
+            const displayHours = Math.floor(durationMins / 60);
+            const displayMinutes = durationMins % 60;
+
+            document.getElementById('time-duration').innerText = `Từ ${startH}h${startM.toString().padStart(2, '0')} đến ${endH}h${endM.toString().padStart(2, '0')} (Tổng: ${displayHours} giờ ${displayMinutes} phút)`;
+            document.getElementById('total-amount').innerText = totalMoney.toLocaleString('vi-VN') + ' VNĐ';
         }
     </script>
 
